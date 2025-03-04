@@ -21,7 +21,7 @@ struct ContentView: View {
     @State private var results = [Result]()
     var body: some View {
         List(results, id: \.trackId) { item in
-            VStack (alignment: .leading) {
+            VStack(alignment: .leading) {
                 Text(item.trackName)
                     .font(.headline)
                 Text(item.collectionName)
@@ -31,6 +31,7 @@ struct ContentView: View {
             await loadData()
         }
     }
+
     func loadData() async {
         guard let url = URL(string: "https://itunes.apple.com/search?term=taylor+swift&entity=song") else {
             print("Invalid URL")
@@ -45,7 +46,6 @@ struct ContentView: View {
         } catch {
             print("Invalid data")
         }
-        
     }
 }
 
