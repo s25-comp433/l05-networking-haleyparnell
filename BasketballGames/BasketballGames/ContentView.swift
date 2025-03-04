@@ -7,15 +7,74 @@
 
 import SwiftUI
 
+struct GameResponse: Codable {
+    var results: [Game]
+}
+
+struct Game: Codable {
+    var id: Int
+    var team: String
+    var opponent: String
+    var date: String
+    var isHomeGame: Bool
+    var score: Score
+}
+
+struct Score: Codable {
+    var unc: Int
+    var opponent: Int
+}
+
 struct ContentView: View {
+    @State private var results = [Game]()
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack {
+            List(results, id: \.id) { game in
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("\(game.team) vs. \(game.opponent)")
+                            .font(.headline)
+                                        
+                        Text(game.date)
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
+                                    
+                    Spacer()
+                                    
+                    VStack(alignment: .trailing) {
+                        Text("\(game.score.unc) - \(game.score.opponent)")
+                            .font(.headline)
+                                        
+                        Text(game.isHomeGame ? "Home" : "Away")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
+                }
+            }
+            .navigationTitle("UNC Basketball")
         }
-        .padding()
+        .task {
+            await loadData()
+        }
+    }
+        
+    func loadData() async {
+        guard let url = URL(string: "https://api.samuelshi.com/uncbasketball") else {
+            print("Invalid URL")
+            return
+        }
+
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+                
+            if let decodedResponse = try? JSONDecoder().decode([Game].self, from: data) {
+                results = decodedResponse
+            }
+        } catch {
+            print("Invalid data")
+        }
     }
 }
 
